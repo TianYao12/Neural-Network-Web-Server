@@ -7,8 +7,6 @@ HDE::SimpleSocket::SimpleSocket(int domain, int service, int protocol, int port,
 
     sock = socket(domain, service, protocol);
     testConnection(sock);
-    connection = connectToNetwork(sock, address);
-    testConnection(connection);
 }
 
 void HDE::SimpleSocket::testConnection(int sockOrConnection) {
@@ -28,4 +26,8 @@ int HDE::SimpleSocket::getConnection() {
 
 int HDE::SimpleSocket::getSock() {
     return sock;
+}
+
+void HDE::SimpleSocket::setConnection(int newConnection) {
+    connection = newConnection;
 }

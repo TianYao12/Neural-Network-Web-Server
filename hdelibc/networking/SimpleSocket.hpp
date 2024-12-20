@@ -19,6 +19,7 @@ namespace HDE {
         struct sockaddr_in getAddress();
         int getSock();
         int getConnection();
+        void setConnection(int);
     };
 };
 

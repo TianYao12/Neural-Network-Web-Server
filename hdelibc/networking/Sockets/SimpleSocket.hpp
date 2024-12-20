@@ -1,5 +1,5 @@
-#ifndef SIMPLE_SOCKET
-#define SIMPLE_SOCKET
+#ifndef SIMPLE_SOCKET_HPP
+#define SIMPLE_SOCKET_HPP
 
 #include <stdio.h>
 #include <sys/socket.h>

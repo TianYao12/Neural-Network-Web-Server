@@ -2,7 +2,9 @@ CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++11
 LDFLAGS =
 
-SRCS = Servers/server.cpp Servers/TestServer.cpp Servers/SimpleServer.cpp Sockets/SimpleSocket.cpp Sockets/BindingSocket.cpp Sockets/ListeningSocket.cpp
+SRCS = Servers/server.cpp Servers/TestServer.cpp Servers/SimpleServer.cpp \
+	   Sockets/SimpleSocket.cpp Sockets/BindingSocket.cpp Sockets/ListeningSocket.cpp \
+	   Database/Database.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

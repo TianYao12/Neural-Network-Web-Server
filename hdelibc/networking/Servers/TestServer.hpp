@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "SimpleServer.hpp"
+#include "../Database/Database.hpp"
 
 namespace HDE {
     class TestServer : public SimpleServer {
@@ -12,7 +13,11 @@ namespace HDE {
         char buffer[30000] = {0};
         void acceptor() override;
         void handler() override;
-        void responder(const std::string& method) override;
+        void responder() override;
+        void handleTrainingRequest(int);
+        void handlePostRequest(const std::string &);
+        void sendErrorResponse();
+        void sendOptionsResponse();
 
         public:
         TestServer();

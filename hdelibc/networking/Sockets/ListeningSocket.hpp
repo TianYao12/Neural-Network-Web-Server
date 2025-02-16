@@ -7,9 +7,12 @@
 namespace HDE {
     class ListeningSocket : public BindingSocket {
         int backlog, listening;
+        
         public:
         ListeningSocket(int, int, int, int, u_long, int);
         void startListening();
+        
+        // Below are gettors and settors
         int getListening();
         int getBacklog();
     };

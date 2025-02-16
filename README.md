@@ -1,1 +1,1 @@
-Web server using C++
+Web server which can receive HTTP requests and send responses using just C++

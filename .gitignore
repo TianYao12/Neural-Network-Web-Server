@@ -1,3 +1,6 @@
 notes.txt
 data
 */training_data.db
+*.o
+*.dat
+*.out

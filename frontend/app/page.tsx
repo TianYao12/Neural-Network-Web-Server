@@ -3,8 +3,15 @@ import { useState, useEffect } from "react";
 
 type Probability = number[];
 
+interface TrainingHistory {
+  epoch: number;
+  loss: number;
+  weights: number[];
+}
+
 interface BackendResponse {
   probabilities: Probability[];
+  trainingHistory: TrainingHistory[];
 }
 
 export default function Home() {
@@ -30,9 +37,17 @@ export default function Home() {
       <h1 className="text-3xl">Neural Network Visualization</h1>
       <div className="flex flex-col gap-5 justify-start">
         {backendResponse?.probabilities.map((probability, index) => (
-          <div className="flex gap-1" key={index}>
-            <p className="font-bold">{`Probability ${index + 1}: `}</p>
-            <div>{probability.map((probability) => `${probability} `)}</div>
+          <div className="flex flex-col gap-1" key={index}>
+            <div className="flex gap-2">
+              <div className="font-bold">{`Probability ${index + 1}:`}</div>
+              <div>{`${probability.map(
+                (probability) => `${probability} `
+              )}`}</div>
+            </div>
+            <div className="flex gap-2">
+              <div className="font-bold">Loss: </div>
+              <div>{backendResponse?.trainingHistory[index].loss}</div>
+            </div>
           </div>
         ))}
       </div>

@@ -17,7 +17,6 @@ namespace HDE {
         void handleTrainingRequest(int);
         void handlePostRequest(const std::string &);
         void sendErrorResponse();
-        void sendOptionsResponse();
 
         public:
         TestServer();

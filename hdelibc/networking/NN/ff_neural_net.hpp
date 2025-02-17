@@ -25,6 +25,7 @@ class FFNeuralNet {
         int true_label,
         double learning_rate
     );
+    std::vector<double> getParamsAsVector() const;
 
 
 public:
@@ -36,7 +37,7 @@ public:
         const std::vector<uint8_t> &labels,
         int epochs, double learning_rate);
 
-    void saveWeights(const std::string &fileName);
+    void saveFinalWeights(const std::string &fileName);
     void loadWeights(const std::string &filename);
 };
 

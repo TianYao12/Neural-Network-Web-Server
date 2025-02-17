@@ -4,15 +4,27 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <utility>
 
 class TrainingDatabase {
     std::string fileName;
+    std::string probabilityFileName;
+    static constexpr int MNIST_POSSIBLE_DIGIT_OUTPUTS = 10;
 
-    public:
-    TrainingDatabase(const std::string& file) : fileName{file} {}
+    struct TrainingRecord {
+        int epoch;
+        double loss;
+        std::vector<double> weights;
+    };
 
-    void saveTrainingData(int epoch, double loss, double accuracy, const std::vector<double>& weights);
-    std::vector<std::vector<double>> loadTrainingData();
+public:
+    TrainingDatabase(const std::string& file, const std::string &probFile) 
+        : fileName(file), probabilityFileName{probFile} {}
+    
+    bool saveTrainingData(int epoch, double loss, const std::vector<double>& weights);
+    std::vector<TrainingRecord> loadTrainingResults();
+    std::vector<std::vector<double>> loadProbabilitiesFromInference();
+    std::pair<std::vector<TrainingRecord>, std::vector<std::vector<double>>> loadAllTrainingData();
 };
 
 #endif

@@ -1,4 +1,5 @@
 #include "ff_neural_net.hpp"
+#include "../Database/Database.hpp"
 #include <vector>
 #include <cmath>
 #include <functional>
@@ -140,6 +141,27 @@ std::vector<double> FFNeuralNet::forward(const std::vector<uint8_t> &input_bytes
 }
 
 /**
+ * @brief Helper function to flatten network parameters (weights and biases) into a single vector.
+ *
+ * @return A vector of doubles containing all weights and biases of the network.
+ */
+std::vector<double> FFNeuralNet::getParamsAsVector() const
+{
+    std::vector<double> params;
+    for (const auto &row : input_to_hidden_weights)
+    {
+        params.insert(params.end(), row.begin(), row.end());
+    }
+    for (const auto &row : hidden_to_output_weights)
+    {
+        params.insert(params.end(), row.begin(), row.end());
+    }
+    params.insert(params.end(), hidden_biases.begin(), hidden_biases.end());
+    params.insert(params.end(), output_biases.begin(), output_biases.end());
+    return params;
+}
+
+/**
  * @brief Using training images and labels to train NN using gradient descent/backpropagation
  *
  * @param images        2D vector of unsigned 8-bit integers representing training images, where each inner vector is a flattened image
@@ -151,6 +173,7 @@ void FFNeuralNet::train(const std::vector<std::vector<uint8_t>> &images,
                         const std::vector<uint8_t> &labels,
                         int epochs, double learning_rate)
 {
+    TrainingDatabase db("training_data.db", "probabilities.dat"); 
 
     size_t num_samples = images.size();
     for (int epoch = 0; epoch < epochs; ++epoch)
@@ -184,11 +207,15 @@ void FFNeuralNet::train(const std::vector<std::vector<uint8_t>> &images,
             backpropagate(input_normalized, hidden_layer_output, output_layer_output, true_label, learning_rate);
         }
 
-        std::cout << "Epoch " << epoch + 1 << " - Loss: " << total_loss / num_samples << std::endl;
+        double average_loss = total_loss / num_samples;
+        std::cout << "Epoch " << epoch + 1 << " - Loss: " << average_loss << std::endl;
+
+        std::vector<double> current_params = getParamsAsVector();
+        db.saveTrainingData(epoch + 1, average_loss, current_params);
     }
 }
 
-void FFNeuralNet::saveWeights(const std::string &filename)
+void FFNeuralNet::saveFinalWeights(const std::string &filename)
 {
     std::ofstream file(filename, std::ios::binary);
     if (!file.is_open())

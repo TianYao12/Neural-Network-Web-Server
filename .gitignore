@@ -4,3 +4,4 @@ data
 *.o
 *.dat
 *.out
+*.db

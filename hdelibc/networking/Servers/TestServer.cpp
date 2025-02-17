@@ -50,52 +50,59 @@ void HDE::TestServer::handler()
         cout << "Handling POST request" << endl;
         handlePostRequest(request);
     } 
-    else if (method == "OPTIONS") { 
-        cout << "Handling OPTIONS request" << endl;
-        sendOptionsResponse(); 
-    }
     else {
         cout << "Unsupported request method: " << method << endl;
         sendErrorResponse();
     }
 }
 
-void HDE::TestServer::sendOptionsResponse() {
-    string response =
-        "HTTP/1.1 204 No Content\r\n"
-        "Access-Control-Allow-Origin: http://localhost:3000\r\n" 
-        "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
-        "Access-Control-Allow-Headers: Content-Type\r\n"
-        "Content-Length: 0\r\n"
-        "\r\n";
-
-    send(newSocket, response.c_str(), response.length(), 0);
-}
-
 void HDE::TestServer::handleTrainingRequest(int clientSocket) {
-    TrainingDatabase db("./NN/probabilities.dat"); 
-    vector<vector<double>> probabilityData = db.loadTrainingData(); 
-    string jsonResponse = "{ \"probabilities\": [";
+    TrainingDatabase db("./NN/training_data.db", "./NN/probabilities.dat");
+    auto [trainingRecords, probabilityData] = db.loadAllTrainingData();
 
+    std::string jsonResponse = "{";
+
+    jsonResponse += "\"probabilities\": [";
     for (size_t i = 0; i < probabilityData.size(); i++) {
         jsonResponse += "[";
         for (size_t j = 0; j < probabilityData[i].size(); j++) {
-            jsonResponse += to_string(probabilityData[i][j]);
+            jsonResponse += std::to_string(probabilityData[i][j]);
             if (j < probabilityData[i].size() - 1) jsonResponse += ",";
         }
         jsonResponse += "]";
         if (i < probabilityData.size() - 1) jsonResponse += ",";
     }
+    jsonResponse += "],";
 
-    jsonResponse += "] }";
+    jsonResponse += "\"trainingHistory\": [";
+    for (size_t i = 0; i < trainingRecords.size(); ++i) {
+        const auto& record = trainingRecords[i];
+        
+        jsonResponse += "{";
+        jsonResponse += "\"epoch\": " + std::to_string(record.epoch) + ",";
+        jsonResponse += "\"loss\": " + std::to_string(record.loss) + ",";
+        jsonResponse += "\"weights\": [";
+        
+        for (size_t j = 0; j < record.weights.size(); ++j) {
+            jsonResponse += std::to_string(record.weights[j]);
+            if (j < record.weights.size() - 1) jsonResponse += ",";
+        }
+        
+        jsonResponse += "]";
+        jsonResponse += "}";
+        
+        if (i < trainingRecords.size() - 1) jsonResponse += ",";
+    }
+    jsonResponse += "]";
+    jsonResponse += "}";
 
-    string response =
+    std::string response =
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: application/json\r\n"
-        "Access-Control-Allow-Origin: http://localhost:3000\r\n" 
+        "Access-Control-Allow-Origin: http://localhost:3000\r\n"
         "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
         "Access-Control-Allow-Headers: Content-Type\r\n"
-        "Content-Length: " + to_string(jsonResponse.length()) + "\r\n"
+        "Content-Length: " + std::to_string(jsonResponse.length()) + "\r\n"
         "\r\n" +
         jsonResponse;
 
@@ -104,20 +111,19 @@ void HDE::TestServer::handleTrainingRequest(int clientSocket) {
 
 void HDE::TestServer::handlePostRequest(const string &request)
 {
-    srand(time(0));
+    // srand(time(0));
 
-    int epoch = rand() % 100; // Random epoch between 0-99
-    double loss = static_cast<double>(rand()) / RAND_MAX; // Random loss between 0.0 and 1.0
-    double accuracy = static_cast<double>(rand() % 100); // Random accuracy between 0 and 100
+    // int epoch = rand() % 100; // Random epoch between 0-99
+    // double loss = static_cast<double>(rand()) / RAND_MAX; // Random loss between 0.0 and 1.0
 
-    vector<double> weights;
-    for (int i = 0; i < 10; i++) // Generate 10 random weights
-    {
-        weights.push_back(static_cast<double>(rand()) / RAND_MAX);
-    }
+    // vector<double> weights;
+    // for (int i = 0; i < 10; i++) // Generate 10 random weights
+    // {
+    //     weights.push_back(static_cast<double>(rand()) / RAND_MAX);
+    // }
 
-    TrainingDatabase db("../training_data.db");
-    db.saveTrainingData(epoch, loss, accuracy, weights);
+    // TrainingDatabase db("../training_data.db");
+    // db.saveTrainingData(epoch, loss, weights);
 
     string response =
         "HTTP/1.1 200 OK\r\n"

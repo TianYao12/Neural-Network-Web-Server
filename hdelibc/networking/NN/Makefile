@@ -1,8 +1,8 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++11 -I./utils 
+CXXFLAGS = -Wall -Wextra -std=c++11 -I./utils -I../Database  # UPDATED: Include path to go *up* one level and into Database
 LDFLAGS =
 
-MNIST_SRCS = mnist/mnist_loader.cpp ff_neural_net.cpp utils/utils.cpp
+MNIST_SRCS = mnist/mnist_loader.cpp ff_neural_net.cpp utils/utils.cpp ../Database/Database.cpp # UPDATED: Path to Database.cpp
 MNIST_OBJS = $(MNIST_SRCS:.cpp=.o)
 
 TRAIN_SRCS = mnist/train.cpp $(MNIST_SRCS)
@@ -25,16 +25,19 @@ mnist/%.o: mnist/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-%.o: %.cpp
-	@mkdir -p $(dir $@) 
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-utils/%.o: utils/%.cpp 
+%.o: %.cpp 
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+utils/%.o: utils/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+../Database/%.o: ../Database/%.cpp  
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 clean:
 	rm -f $(MNIST_OBJS) $(TRAIN_OBJS) $(INFERENCE_OBJS) $(TRAIN_TARGET) $(INFERENCE_TARGET) weights.dat
-	find mnist utils -name "*.o" -type f -delete
+	find mnist utils ../Database -name "*.o" -type f -delete # UPDATED: Clean rule to look in ../Database
 
 .PHONY: all clean

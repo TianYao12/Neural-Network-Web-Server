@@ -73,18 +73,18 @@ void HDE::TestServer::sendOptionsResponse() {
 }
 
 void HDE::TestServer::handleTrainingRequest(int clientSocket) {
-    TrainingDatabase db("../training_data.db");
-    vector<vector<double>> trainingData = db.loadTrainingData();
-    string jsonResponse = "{ \"epochs\": [";
+    TrainingDatabase db("./NN/probabilities.dat"); 
+    vector<vector<double>> probabilityData = db.loadTrainingData(); 
+    string jsonResponse = "{ \"probabilities\": [";
 
-    for (size_t i = 0; i < trainingData.size(); i++) {
+    for (size_t i = 0; i < probabilityData.size(); i++) {
         jsonResponse += "[";
-        for (size_t j = 0; j < trainingData[i].size(); j++) {
-            jsonResponse += to_string(trainingData[i][j]);
-            if (j < trainingData[i].size() - 1) jsonResponse += ",";
+        for (size_t j = 0; j < probabilityData[i].size(); j++) {
+            jsonResponse += to_string(probabilityData[i][j]);
+            if (j < probabilityData[i].size() - 1) jsonResponse += ",";
         }
         jsonResponse += "]";
-        if (i < trainingData.size() - 1) jsonResponse += ",";
+        if (i < probabilityData.size() - 1) jsonResponse += ",";
     }
 
     jsonResponse += "] }";

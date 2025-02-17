@@ -25,73 +25,23 @@ void TrainingDatabase::saveTrainingData(int epoch, double loss, double accuracy,
 
 vector<vector<double>> TrainingDatabase::loadTrainingData()
 {
-    ifstream file(fileName, ios::binary);
+    const int MNIST_POSSIBLE_DIGIT_OUTPUTS = 10;
+    ifstream file("./NN/probabilities.dat", ios::binary);
     if (!file)
     {
-        cerr << "loadTrainingData: Error opening file for reading!";
+        cerr << "loadTrainingData: Error opening probabilities file for reading!";
         return {};
     }
 
-    vector<vector<double>> trainingHistory;
-
+    vector<vector<double>> probabilityHistory;
     while (!file.eof())
     {
-        int epoch, numWeights;
-        double loss, accuracy;
-
-        // continously read each field to keep file position correct 
-        if (!file.read(reinterpret_cast<char *>(&epoch), sizeof(epoch)))
-            break;
-        if (!file.read(reinterpret_cast<char *>(&loss), sizeof(loss)))
-            break;
-        if (!file.read(reinterpret_cast<char *>(&accuracy), sizeof(accuracy)))
-            break;
-        if (!file.read(reinterpret_cast<char *>(&numWeights), sizeof(numWeights)))
+        vector<double> probabilities(MNIST_POSSIBLE_DIGIT_OUTPUTS);
+        if (!file.read(reinterpret_cast<char *>(probabilities.data()), MNIST_POSSIBLE_DIGIT_OUTPUTS * sizeof(double)))
             break;
 
-        vector<double> weights(numWeights);
-        if (!file.read(reinterpret_cast<char *>(weights.data()), numWeights * sizeof(double)))
-            break;
-
-        cout << "Epoch: " << epoch << " | Loss: " << loss << " | Accuracy: " << accuracy << endl;
-        trainingHistory.push_back(weights);
+        probabilityHistory.push_back(probabilities);
     }
     file.close();
-    return trainingHistory;
-}
-
-vector<double> TrainingDatabase::getTrainingEpoch(int searchEpoch)
-{
-    ifstream file(fileName, ios::binary);
-    if (!file)
-    {
-        cerr << "getTrainingEpoch: Error opening file for reading!" << endl;
-        return {};
-    }
-    while (!file.eof())
-    {
-        int epoch, numWeights;
-        double loss, accuracy;
-        if (!file.read(reinterpret_cast<char *>(&epoch), sizeof(epoch)))
-            break;
-        if (!file.read(reinterpret_cast<char *>(&loss), sizeof(loss)))
-            break;
-        if (!file.read(reinterpret_cast<char *>(&accuracy), sizeof(accuracy)))
-            break;
-        if (!file.read(reinterpret_cast<char *>(&numWeights), sizeof(numWeights)))
-            break;
-
-        vector<double> weights(numWeights);
-        if (!file.read(reinterpret_cast<char *>(weights.data()), numWeights * sizeof(double)))
-            break;
-
-        if (epoch == searchEpoch)
-        {
-            cout << "Found Epoch: " << epoch << " | Loss: " << loss << " | Accuracy: " << accuracy << endl;
-            return weights;
-        }
-    }
-
-    cout << "Epoch " << searchEpoch << " not found!" << endl;
-    return {};
+    return probabilityHistory;
 }

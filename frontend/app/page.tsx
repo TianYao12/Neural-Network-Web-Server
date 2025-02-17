@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 
-type Epoch = number[];
+type Probability = number[];
 
 interface BackendResponse {
-  epochs: Epoch[];
+  probabilities: Probability[];
 }
 
 export default function Home() {
@@ -29,10 +29,10 @@ export default function Home() {
     <div className="mt-32 flex flex-col gap-10 w-full justify-center items-center font-[family-name:var(--font-geist-sans)]">
       <h1 className="text-3xl">Neural Network Visualization</h1>
       <div className="flex flex-col gap-5 justify-start">
-        {backendResponse?.epochs.map((epoch, index) => (
+        {backendResponse?.probabilities.map((probability, index) => (
           <div className="flex gap-1" key={index}>
-            <p className="font-bold">{`Epoch ${index}: `}</p>
-            <div>{epoch.map((item) => `${item} `)}</div>
+            <p className="font-bold">{`Probability ${index + 1}: `}</p>
+            <div>{probability.map((probability) => `${probability} `)}</div>
           </div>
         ))}
       </div>

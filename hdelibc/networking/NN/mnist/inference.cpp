@@ -1,6 +1,9 @@
 #include "mnist_loader.hpp"
 #include "../ff_neural_net.hpp"
 #include <iostream>
+#include <fstream>
+
+using namespace std;
 
 const int MNIST_IMAGE_ROWS = 28;
 const int MNIST_IMAGE_COLS = 28;
@@ -15,6 +18,13 @@ int main()
     FFNeuralNet net(MNIST_IMAGE_SIZE, 128, MNIST_POSSIBLE_DIGIT_OUTPUTS);
     net.loadWeights("weights.dat");
 
+    std::ofstream prob_file("probabilities.dat", std::ios::binary);
+    if (!prob_file.is_open())
+    {
+        std::cerr << "Error opening probabilities.dat for writing!" << std::endl;
+        return 1;
+    }
+
     for (size_t i = 0; i < test_images.size(); ++i)
     {
         if (test_images[i].size() != MNIST_IMAGE_SIZE)
@@ -23,15 +33,13 @@ int main()
             continue;
         }
 
-        std::vector<double> output = net.forward(test_images[i]);
-
-        std::cout << "Output probabilities: ";
-        std::cout.precision(10);
-        for (double prob : output)
-        {
-            std::cout << prob << " ";
+        std::vector<double> probabilityOutputs = net.forward(test_images[i]);
+        for (int i = 0; i < probabilityOutputs.size(); ++i) {
+            cout << probabilityOutputs.data()[i];
         }
-        std::cout << "\n\n";
+        prob_file.write(reinterpret_cast<const char*>(probabilityOutputs.data()), probabilityOutputs.size() * sizeof(double));
     }
+    
+    prob_file.close();
     return 0;
 }

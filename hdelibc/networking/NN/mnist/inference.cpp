@@ -16,7 +16,7 @@ int main()
     std::cout << "Number of images loaded: " << test_images.size() << std::endl;
 
     FFNeuralNet net(MNIST_IMAGE_SIZE, 128, MNIST_POSSIBLE_DIGIT_OUTPUTS);
-    net.loadWeights("weights.dat");
+    net.loadPretrainedWeights("weights.dat");
 
     std::ofstream prob_file("probabilities.dat", std::ios::binary);
     if (!prob_file.is_open())
@@ -33,13 +33,14 @@ int main()
             continue;
         }
 
-        std::vector<double> probabilityOutputs = net.forward(test_images[i]);
-        for (int i = 0; i < probabilityOutputs.size(); ++i) {
+        std::vector<double> probabilityOutputs = net.performForwardPass(test_images[i]);
+        for (int i = 0; i < probabilityOutputs.size(); ++i)
+        {
             cout << probabilityOutputs.data()[i];
         }
-        prob_file.write(reinterpret_cast<const char*>(probabilityOutputs.data()), probabilityOutputs.size() * sizeof(double));
+        prob_file.write(reinterpret_cast<const char *>(probabilityOutputs.data()), probabilityOutputs.size() * sizeof(double));
     }
-    
+
     prob_file.close();
     return 0;
 }

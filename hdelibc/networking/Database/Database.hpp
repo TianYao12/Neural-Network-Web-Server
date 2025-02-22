@@ -18,9 +18,7 @@ class TrainingDatabase {
     };
 
 public:
-    TrainingDatabase(const std::string& file, const std::string &probFile) 
-        : fileName(file), probabilityFileName{probFile} {}
-    
+    TrainingDatabase(const std::string& file, const std::string &probFile); 
     bool saveTrainingData(int epoch, double loss, const std::vector<double>& weights);
     std::vector<TrainingRecord> loadTrainingResults();
     std::vector<std::vector<double>> loadProbabilitiesFromInference();

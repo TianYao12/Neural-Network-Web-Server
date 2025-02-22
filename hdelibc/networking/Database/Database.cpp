@@ -1,21 +1,37 @@
 #include "Database.hpp"
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 using namespace std;
 
-bool TrainingDatabase::saveTrainingData(int epoch, double loss, const std::vector<double>& weights) {
-    std::ofstream file(fileName, std::ios::binary | std::ios::app);
+TrainingDatabase::TrainingDatabase(const string& file, const string &probFile) 
+    : fileName(file), probabilityFileName{probFile} 
+{
+    if (!filesystem::exists(fileName)) {
+        ofstream file(fileName, ios::binary | ios::trunc);
+        file.close();
+    }
+    
+    if (!filesystem::exists(probabilityFileName)) {
+        ofstream probFile(probabilityFileName, ios::binary | ios::trunc);
+        probFile.close();
+    }
+}
+
+
+bool TrainingDatabase::saveTrainingData(int epoch, double loss, const vector<double>& weights) {
+    ofstream file(fileName, ios::binary | ios::app);
     if (!file) {
-        std::cerr << "saveTrainingData: Error opening file for writing: " << fileName << std::endl;
+        cerr << "saveTrainingData: Error opening file for writing: " << fileName << endl;
         return false;
     }
 
     int numWeights = weights.size();
     
-    std::cout << "Writing record - Size in bytes: " 
+    cout << "Writing record - Size in bytes: " 
               << (sizeof(epoch) + sizeof(loss) + sizeof(numWeights) + numWeights * sizeof(double))
-              << std::endl;
+              << endl;
     
     file.write(reinterpret_cast<const char*>(&epoch), sizeof(epoch));
     file.write(reinterpret_cast<const char*>(&loss), sizeof(loss));
@@ -23,40 +39,40 @@ bool TrainingDatabase::saveTrainingData(int epoch, double loss, const std::vecto
     file.write(reinterpret_cast<const char*>(weights.data()), numWeights * sizeof(double));
     
     if (!file) {
-        std::cerr << "saveTrainingData: Error writing data for epoch " << epoch << std::endl;
+        cerr << "saveTrainingData: Error writing data for epoch " << epoch << endl;
         return false;
     }
 
-    std::cout << "Saved training data - Epoch: " << epoch 
+    cout << "Saved training data - Epoch: " << epoch 
               << ", Loss: " << loss 
-              << ", Weights: " << numWeights << std::endl;
+              << ", Weights: " << numWeights << endl;
     
     file.close();
     return true;
 }
 
-std::vector<TrainingDatabase::TrainingRecord> TrainingDatabase::loadTrainingResults() {
-    std::ifstream file(fileName, std::ios::binary);
+vector<TrainingDatabase::TrainingRecord> TrainingDatabase::loadTrainingResults() {
+    ifstream file(fileName, ios::binary);
     if (!file) {
-        std::cerr << "loadTrainingResults: Error opening file: " << fileName << std::endl;
+        cerr << "loadTrainingResults: Error opening file: " << fileName << endl;
         return {};
     }
 
-    file.seekg(0, std::ios::end);
-    std::streamsize fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
+    file.seekg(0, ios::end);
+    streamsize fileSize = file.tellg();
+    file.seekg(0, ios::beg);
 
-    std::cout << "Training data file size: " << fileSize << " bytes" << std::endl;
+    cout << "Training data file size: " << fileSize << " bytes" << endl;
 
-    const std::streamsize EXPECTED_RECORD_SIZE = sizeof(int) + sizeof(double) + sizeof(int) + (101770 * sizeof(double));
-    std::cout << "Expected record size: " << EXPECTED_RECORD_SIZE << " bytes" << std::endl;
+    const streamsize EXPECTED_RECORD_SIZE = sizeof(int) + sizeof(double) + sizeof(int) + (101770 * sizeof(double));
+    cout << "Expected record size: " << EXPECTED_RECORD_SIZE << " bytes" << endl;
 
     if (fileSize % EXPECTED_RECORD_SIZE != 0) {
-        std::cerr << "Warning: File size is not a multiple of expected record size" << std::endl;
+        cerr << "Warning: File size is not a multiple of expected record size" << endl;
     }
 
-    std::vector<TrainingRecord> records;
-    std::streamsize bytesRead = 0;
+    vector<TrainingRecord> records;
+    streamsize bytesRead = 0;
 
     while (file && bytesRead < fileSize) {
         TrainingRecord record;
@@ -74,27 +90,27 @@ std::vector<TrainingDatabase::TrainingRecord> TrainingDatabase::loadTrainingResu
         record.weights.resize(numWeights);
         if (!file.read(reinterpret_cast<char*>(record.weights.data()), 
                       numWeights * sizeof(double))) {
-            std::cerr << "Error reading weights at epoch " << record.epoch << std::endl;
+            cerr << "Error reading weights at epoch " << record.epoch << endl;
             break;
         }
 
         bytesRead = file.tellg();
-        std::cout << "Loaded epoch " << record.epoch 
+        cout << "Loaded epoch " << record.epoch 
                   << ", loss " << record.loss 
                   << ", weights " << numWeights 
-                  << " (bytes read: " << bytesRead << ")" << std::endl;
+                  << " (bytes read: " << bytesRead << ")" << endl;
 
         if (!record.weights.empty()) {
-            std::cout << "First 3 weights: " 
+            cout << "First 3 weights: " 
                      << record.weights[0] << " "
                      << record.weights[1] << " "
-                     << record.weights[2] << std::endl;
+                     << record.weights[2] << endl;
         }
 
         records.push_back(record);
     }
 
-    std::cout << "Loaded " << records.size() << " training records" << std::endl;
+    cout << "Loaded " << records.size() << " training records" << endl;
     file.close();
     return records;
 }
@@ -123,7 +139,7 @@ vector<vector<double>> TrainingDatabase::loadProbabilitiesFromInference()
     return probabilityDataHistory;
 }
 
-std::pair<std::vector<TrainingDatabase::TrainingRecord>, std::vector<std::vector<double>>> 
+pair<vector<TrainingDatabase::TrainingRecord>, vector<vector<double>>> 
 TrainingDatabase::loadAllTrainingData() {
     return {loadTrainingResults(), loadProbabilitiesFromInference()};
 }

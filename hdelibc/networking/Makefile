@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++11
+CXXFLAGS = -Wall -Wextra -std=c++20
 LDFLAGS =
 
 SRCS = Servers/server.cpp Servers/TestServer.cpp Servers/SimpleServer.cpp \

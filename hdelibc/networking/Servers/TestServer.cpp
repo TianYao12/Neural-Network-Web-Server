@@ -8,8 +8,8 @@
 #include <unistd.h>
 #include <sys/socket.h>
 
-#include <cstdlib> 
-#include <ctime>   
+#include <cstdlib>
+#include <ctime>
 
 using namespace std;
 
@@ -18,80 +18,96 @@ HDE::TestServer::TestServer() : SimpleServer{AF_INET, SOCK_STREAM, 0, 80, INADDR
     start();
 }
 
-void HDE::TestServer::acceptor()
+void HDE::TestServer::acceptClientConnection()
 {
     struct sockaddr_in address = getSocket()->getAddress();
     int arrLen = sizeof(address);
+
     newSocket = accept(getSocket()->getSock(), (struct sockaddr *)&address, (socklen_t *)&arrLen);
-    if (newSocket < 0) {
+    if (newSocket < 0)
+    {
         cerr << "Failed to accept connection!" << endl;
         return;
     }
+
     memset(buffer, 0, sizeof(buffer)); // Clear buffer
     read(newSocket, buffer, 30000);
 }
 
-void HDE::TestServer::handler()
+void HDE::TestServer::processRequestAndRespond()
 {
     string request(buffer);
-    cout << "Received Request:\n" << request << endl;
+    cout << "Received Request:\n"
+         << request << endl;
 
     stringstream requestStream(request);
     string method, path, protocol;
-    requestStream >> method >> path >> protocol;
 
+    requestStream >> method >> path >> protocol;
     this->method = method;
 
-    if (method == "GET") {
+    if (method == "GET")
+    {
         cout << "Handling GET request" << endl;
         handleTrainingRequest(newSocket);
-    } 
-    else if (method == "POST") {
+    }
+    else if (method == "POST")
+    {
         cout << "Handling POST request" << endl;
         handlePostRequest(request);
-    } 
-    else {
+    }
+    else
+    {
         cout << "Unsupported request method: " << method << endl;
         sendErrorResponse();
     }
 }
 
-void HDE::TestServer::handleTrainingRequest(int clientSocket) {
+void HDE::TestServer::handleTrainingRequest(int clientSocket)
+{
     TrainingDatabase db("./NN/training_data.db", "./NN/probabilities.dat");
     auto [trainingRecords, probabilityData] = db.loadAllTrainingData();
 
     std::string jsonResponse = "{";
 
     jsonResponse += "\"probabilities\": [";
-    for (size_t i = 0; i < probabilityData.size(); i++) {
+    for (size_t i = 0; i < probabilityData.size(); i++)
+    {
         jsonResponse += "[";
-        for (size_t j = 0; j < probabilityData[i].size(); j++) {
+        for (size_t j = 0; j < probabilityData[i].size(); j++)
+        {
             jsonResponse += std::to_string(probabilityData[i][j]);
-            if (j < probabilityData[i].size() - 1) jsonResponse += ",";
+            if (j < probabilityData[i].size() - 1)
+                jsonResponse += ",";
         }
         jsonResponse += "]";
-        if (i < probabilityData.size() - 1) jsonResponse += ",";
+        if (i < probabilityData.size() - 1)
+            jsonResponse += ",";
     }
     jsonResponse += "],";
 
     jsonResponse += "\"trainingHistory\": [";
-    for (size_t i = 0; i < trainingRecords.size(); ++i) {
-        const auto& record = trainingRecords[i];
-        
+    for (size_t i = 0; i < trainingRecords.size(); ++i)
+    {
+        const auto &record = trainingRecords[i];
+
         jsonResponse += "{";
         jsonResponse += "\"epoch\": " + std::to_string(record.epoch) + ",";
         jsonResponse += "\"loss\": " + std::to_string(record.loss) + ",";
         jsonResponse += "\"weights\": [";
-        
-        for (size_t j = 0; j < record.weights.size(); ++j) {
+
+        for (size_t j = 0; j < record.weights.size(); ++j)
+        {
             jsonResponse += std::to_string(record.weights[j]);
-            if (j < record.weights.size() - 1) jsonResponse += ",";
+            if (j < record.weights.size() - 1)
+                jsonResponse += ",";
         }
-        
+
         jsonResponse += "]";
         jsonResponse += "}";
-        
-        if (i < trainingRecords.size() - 1) jsonResponse += ",";
+
+        if (i < trainingRecords.size() - 1)
+            jsonResponse += ",";
     }
     jsonResponse += "]";
     jsonResponse += "}";
@@ -102,8 +118,9 @@ void HDE::TestServer::handleTrainingRequest(int clientSocket) {
         "Access-Control-Allow-Origin: http://localhost:3000\r\n"
         "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
         "Access-Control-Allow-Headers: Content-Type\r\n"
-        "Content-Length: " + std::to_string(jsonResponse.length()) + "\r\n"
-        "\r\n" +
+        "Content-Length: " +
+        std::to_string(jsonResponse.length()) + "\r\n"
+                                                "\r\n" +
         jsonResponse;
 
     send(clientSocket, response.c_str(), response.length(), 0);
@@ -153,9 +170,9 @@ void HDE::TestServer::sendErrorResponse()
     send(newSocket, response.c_str(), response.length(), 0);
 }
 
-void HDE::TestServer::responder()
+void HDE::TestServer::closeConnection()
 {
-    close(newSocket); 
+    close(newSocket);
 }
 
 void HDE::TestServer::start()
@@ -163,9 +180,9 @@ void HDE::TestServer::start()
     while (true)
     {
         cout << "Waiting for client connections..." << endl;
-        acceptor();  // Accepts a client connection
-        handler();   // Process request
-        responder(); // Close connection
+        acceptClientConnection();          
+        processRequestAndRespond(); 
+        closeConnection();
         cout << "Finished handling request." << endl;
     }
 }

@@ -6,19 +6,21 @@
 #include "SimpleServer.hpp"
 #include "../Database/Database.hpp"
 
-namespace HDE {
-    class TestServer : public SimpleServer {
+namespace HDE
+{
+    class TestServer : public SimpleServer
+    {
         int newSocket;
         std::string method;
         char buffer[30000] = {0};
-        void acceptor() override;
-        void handler() override;
-        void responder() override;
+        void acceptClientConnection() override;
+        void processRequestAndRespond() override;
+        void closeConnection() override;
         void handleTrainingRequest(int);
         void handlePostRequest(const std::string &);
         void sendErrorResponse();
 
-        public:
+    public:
         TestServer();
         void start() override;
         std::unordered_map<std::string, std::string> parseHeaders(const std::string &request);

@@ -5,14 +5,16 @@
 #include <unistd.h>
 #include "../hdelibc-networking.hpp"
 
-namespace HDE {
-    class SimpleServer {
+namespace HDE
+{
+    class SimpleServer
+    {
         ListeningSocket *socket;
         virtual void acceptor() = 0;
-        virtual void handler() = 0;
-        virtual void responder() = 0;
+        virtual void processRequestAndRespond() = 0;
+        virtual void closeConnection() = 0;
 
-        public:
+    public:
         SimpleServer(int, int, int, int, u_long, int);
         virtual void start() = 0;
 

@@ -4,11 +4,13 @@
 #include <numeric>
 #include <algorithm>
 
-void NNUtils::initializeWeights(std::vector<std::vector<double>> &weights, double min_val, double max_val)
+using namespace std;
+
+void NNUtils::initializeWeights(vector<vector<double>> &weights, double min_val, double max_val)
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> dist(min_val, max_val);
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<double> dist(min_val, max_val);
     for (auto &row : weights)
     {
         for (auto &w : row)
@@ -18,25 +20,25 @@ void NNUtils::initializeWeights(std::vector<std::vector<double>> &weights, doubl
     }
 }
 
-void NNUtils::initializeBiases(std::vector<double> &biases, double initial_value)
+void NNUtils::initializeBiases(vector<double> &biases, double initial_value)
 {
-    std::fill(biases.begin(), biases.end(), initial_value);
+    fill(biases.begin(), biases.end(), initial_value);
 }
 
-double NNUtils::Activations::relu(double x)
+double NNUtils::ActivationFunctions::relu(double x)
 {
-    return std::max(0.0, x);
+    return max(0.0, x);
 }
 
-double NNUtils::Activations::reluDerivative(double x)
+double NNUtils::ActivationFunctions::reluDerivative(double x)
 {
     return (x > 0.0) ? 1.0 : 0.0;
 }
 
-std::vector<double> NNUtils::Activations::softmax(const std::vector<double> &logits)
+vector<double> NNUtils::ActivationFunctions::softmax(const vector<double> &logits)
 {
-    double max_val = *std::max_element(logits.begin(), logits.end());
-    std::vector<double> exp_values(logits.size());
+    double max_val = *max_element(logits.begin(), logits.end());
+    vector<double> exp_values(logits.size());
     double sum_exp = 0.0;
     for (size_t i = 0; i < logits.size(); ++i)
     {

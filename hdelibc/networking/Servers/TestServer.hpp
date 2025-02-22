@@ -22,7 +22,7 @@ namespace HDE
 
     public:
         TestServer();
-        void start() override;
+        void startServer() override;
         std::unordered_map<std::string, std::string> parseHeaders(const std::string &request);
         std::string jsonResponse(const std::string &message);
     };

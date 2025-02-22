@@ -6,6 +6,8 @@
 #include <fstream>
 #include <iostream>
 
+using namespace std;
+
 /**
  * @brief Forward pass for a single layer
  *
@@ -16,13 +18,13 @@
  *
  * @return Output vector for the current layer
  */
-std::vector<double> FFNeuralNet::layerForward(
-    const std::vector<double> &input,
-    const std::vector<std::vector<double>> &weights,
-    std::vector<double> &biases,
-    std::function<double(double)> activation_function)
+vector<double> FFNeuralNet::layerForward(
+    const vector<double> &input,
+    const vector<vector<double>> &weights,
+    vector<double> &biases,
+    function<double(double)> activation_function)
 {
-    std::vector<double> output(weights.size(), 0.0);
+    vector<double> output(weights.size(), 0.0);
     for (size_t i = 0; i < weights.size(); ++i)
     {
         for (size_t j = 0; j < input.size(); ++j)
@@ -45,13 +47,13 @@ std::vector<double> FFNeuralNet::layerForward(
  * @param learning_rate         Control magnitude of weight and bias updates
  */
 void FFNeuralNet::backpropagate(
-    const std::vector<double> &input_normalized,
-    const std::vector<double> &hidden_layer_output,
-    const std::vector<double> &output_layer_output,
+    const vector<double> &input_normalized,
+    const vector<double> &hidden_layer_output,
+    const vector<double> &output_layer_output,
     int true_label,
     double learning_rate)
 {
-    std::vector<double> output_error(output_layer_output.size());
+    vector<double> output_error(output_layer_output.size());
     for (size_t j = 0; j < output_layer_output.size(); ++j)
     {
         output_error[j] = output_layer_output[j] - (j == true_label ? 1.0 : 0.0);
@@ -67,7 +69,7 @@ void FFNeuralNet::backpropagate(
         output_biases[j] -= learning_rate * output_error[j];
     }
 
-    std::vector<double> hidden_error(hidden_layer_output.size(), 0.0);
+    vector<double> hidden_error(hidden_layer_output.size(), 0.0);
     for (size_t j = 0; j < hidden_layer_output.size(); ++j)
     {
         for (size_t k = 0; k < output_layer_output.size(); ++k)
@@ -78,7 +80,7 @@ void FFNeuralNet::backpropagate(
 
     for (size_t j = 0; j < hidden_error.size(); ++j)
     {
-        hidden_error[j] *= NNUtils::Activations::reluDerivative(hidden_layer_output[j]);
+        hidden_error[j] *= NNUtils::ActivationFunctions::reluDerivative(hidden_layer_output[j]);
     }
 
     // Gradients for input-to-hidden weights and hidden biases
@@ -97,10 +99,10 @@ void FFNeuralNet::backpropagate(
  *
  * @param input_size  Number of neurons in the input layer
  * @param hidden_size Number of neurons in the hidden layer
- * @param output_size Number of neurons in the output layer / number of output classes 
+ * @param output_size Number of neurons in the output layer / number of output classes
  */
-FFNeuralNet::FFNeuralNet(int input_size, int hidden_size, int output_size) : input_to_hidden_weights(hidden_size, std::vector<double>(input_size)),
-                                                                             hidden_to_output_weights(output_size, std::vector<double>(hidden_size)),
+FFNeuralNet::FFNeuralNet(int input_size, int hidden_size, int output_size) : input_to_hidden_weights(hidden_size, vector<double>(input_size)),
+                                                                             hidden_to_output_weights(output_size, vector<double>(hidden_size)),
                                                                              hidden_biases(hidden_size),
                                                                              output_biases(output_size)
 {
@@ -117,27 +119,27 @@ FFNeuralNet::FFNeuralNet(int input_size, int hidden_size, int output_size) : inp
  *
  * @return Output vector containing probabilities for each class after softmax activation (vector size = # output neurons/classes)
  */
-std::vector<double> FFNeuralNet::forward(const std::vector<uint8_t> &input_bytes)
+vector<double> FFNeuralNet::forward(const vector<uint8_t> &input_bytes)
 {
-    std::vector<double> input_normalized(input_bytes.size());
+    vector<double> input_normalized(input_bytes.size());
     for (size_t i = 0; i < input_bytes.size(); ++i)
     {
         input_normalized[i] = static_cast<double>(input_bytes[i]) / 255.0;
     }
 
-    std::vector<double> hidden_layer_output = layerForward(
+    vector<double> hidden_layer_output = layerForward(
         input_normalized,
         input_to_hidden_weights,
-        hidden_biases, NNUtils::Activations::relu);
+        hidden_biases, NNUtils::ActivationFunctions::relu);
 
-    std::vector<double> output_layer_logits = layerForward(
+    vector<double> output_layer_logits = layerForward(
         hidden_layer_output,
         hidden_to_output_weights,
         output_biases,
         [](double x)
         { return x; });
 
-    return NNUtils::Activations::softmax(output_layer_logits);
+    return NNUtils::ActivationFunctions::softmax(output_layer_logits);
 }
 
 /**
@@ -145,9 +147,9 @@ std::vector<double> FFNeuralNet::forward(const std::vector<uint8_t> &input_bytes
  *
  * @return A vector of doubles containing all weights and biases of the network.
  */
-std::vector<double> FFNeuralNet::getParamsAsVector() const
+vector<double> FFNeuralNet::getParamsAsVector() const
 {
-    std::vector<double> params;
+    vector<double> params;
     for (const auto &row : input_to_hidden_weights)
     {
         params.insert(params.end(), row.begin(), row.end());
@@ -167,13 +169,13 @@ std::vector<double> FFNeuralNet::getParamsAsVector() const
  * @param images        2D vector of unsigned 8-bit integers representing training images, where each inner vector is a flattened image
  * @param labels        Vector of unsigned 8-bit integers representing labels for the training images.
  * @param epochs        Number of training epochs
- * @param learning_rate Controls step size of weight and bias updates in gradient descent 
+ * @param learning_rate Controls step size of weight and bias updates in gradient descent
  */
-void FFNeuralNet::train(const std::vector<std::vector<uint8_t>> &images,
-                        const std::vector<uint8_t> &labels,
+void FFNeuralNet::train(const vector<vector<uint8_t>> &images,
+                        const vector<uint8_t> &labels,
                         int epochs, double learning_rate)
 {
-    TrainingDatabase db("training_data.db", "probabilities.dat"); 
+    TrainingDatabase db("training_data.db", "probabilities.dat");
 
     size_t num_samples = images.size();
     for (int epoch = 0; epoch < epochs; ++epoch)
@@ -182,18 +184,18 @@ void FFNeuralNet::train(const std::vector<std::vector<uint8_t>> &images,
 
         for (size_t i = 0; i < num_samples; ++i)
         {
-            std::vector<double> input_normalized(images[i].size());
+            vector<double> input_normalized(images[i].size());
             for (size_t j = 0; j < images[i].size(); ++j)
             {
                 input_normalized[j] = static_cast<double>(images[i][j]) / 255.0;
             }
 
-            std::vector<double> hidden_layer_output = layerForward(
+            vector<double> hidden_layer_output = layerForward(
                 input_normalized,
                 input_to_hidden_weights,
-                hidden_biases, NNUtils::Activations::relu);
+                hidden_biases, NNUtils::ActivationFunctions::relu);
 
-            std::vector<double> output_layer_output = NNUtils::Activations::softmax(layerForward(
+            vector<double> output_layer_output = NNUtils::ActivationFunctions::softmax(layerForward(
                 hidden_layer_output,
                 hidden_to_output_weights,
                 output_biases,
@@ -208,19 +210,19 @@ void FFNeuralNet::train(const std::vector<std::vector<uint8_t>> &images,
         }
 
         double average_loss = total_loss / num_samples;
-        std::cout << "Epoch " << epoch + 1 << " - Loss: " << average_loss << std::endl;
+        cout << "Epoch " << epoch + 1 << " - Loss: " << average_loss << endl;
 
-        std::vector<double> current_params = getParamsAsVector();
+        vector<double> current_params = getParamsAsVector();
         db.saveTrainingData(epoch + 1, average_loss, current_params);
     }
 }
 
-void FFNeuralNet::saveFinalWeights(const std::string &filename)
+void FFNeuralNet::saveFinalWeights(const string &filename)
 {
-    std::ofstream file(filename, std::ios::binary);
+    ofstream file(filename, ios::binary);
     if (!file.is_open())
     {
-        std::cerr << "Error opening file for saving weights: " << filename << std::endl;
+        cerr << "Error opening file for saving weights: " << filename << endl;
         return;
     }
     try
@@ -248,19 +250,19 @@ void FFNeuralNet::saveFinalWeights(const std::string &filename)
             file.write(reinterpret_cast<const char *>(&b), sizeof(double));
         }
     }
-    catch (const std::exception &e)
+    catch (const exception &e)
     {
-        std::cerr << "Error writing weights to file: " << e.what() << std::endl;
+        cerr << "Error writing weights to file: " << e.what() << endl;
     }
     file.close();
 }
 
-void FFNeuralNet::loadWeights(const std::string &filename)
+void FFNeuralNet::loadWeights(const string &filename)
 {
-    std::ifstream file(filename, std::ios::binary);
+    ifstream file(filename, ios::binary);
     if (!file.is_open())
     {
-        std::cerr << "Error opening weight file for loading: " << filename << std::endl;
+        cerr << "Error opening weight file for loading: " << filename << endl;
         return;
     }
     try
@@ -288,9 +290,9 @@ void FFNeuralNet::loadWeights(const std::string &filename)
             file.read(reinterpret_cast<char *>(&b), sizeof(double));
         }
     }
-    catch (const std::exception &e)
+    catch (const exception &e)
     {
-        std::cerr << "Error reading weights from file: " << e.what() << std::endl;
+        cerr << "Error reading weights from file: " << e.what() << endl;
     }
     file.close();
 }

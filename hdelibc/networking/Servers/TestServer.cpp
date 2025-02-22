@@ -15,7 +15,7 @@ using namespace std;
 
 HDE::TestServer::TestServer() : SimpleServer{AF_INET, SOCK_STREAM, 0, 80, INADDR_ANY, 10}
 {
-    start();
+    startServer();
 }
 
 void HDE::TestServer::acceptClientConnection()
@@ -68,7 +68,7 @@ void HDE::TestServer::handleTrainingRequest(int clientSocket)
     TrainingDatabase db("./NN/training_data.db", "./NN/probabilities.dat");
     auto [trainingRecords, probabilityData] = db.loadAllTrainingData();
 
-    std::string jsonResponse = "{";
+    string jsonResponse = "{";
 
     jsonResponse += "\"probabilities\": [";
     for (size_t i = 0; i < probabilityData.size(); i++)
@@ -76,7 +76,7 @@ void HDE::TestServer::handleTrainingRequest(int clientSocket)
         jsonResponse += "[";
         for (size_t j = 0; j < probabilityData[i].size(); j++)
         {
-            jsonResponse += std::to_string(probabilityData[i][j]);
+            jsonResponse += to_string(probabilityData[i][j]);
             if (j < probabilityData[i].size() - 1)
                 jsonResponse += ",";
         }
@@ -92,13 +92,13 @@ void HDE::TestServer::handleTrainingRequest(int clientSocket)
         const auto &record = trainingRecords[i];
 
         jsonResponse += "{";
-        jsonResponse += "\"epoch\": " + std::to_string(record.epoch) + ",";
-        jsonResponse += "\"loss\": " + std::to_string(record.loss) + ",";
+        jsonResponse += "\"epoch\": " + to_string(record.epoch) + ",";
+        jsonResponse += "\"loss\": " + to_string(record.loss) + ",";
         jsonResponse += "\"weights\": [";
 
         for (size_t j = 0; j < record.weights.size(); ++j)
         {
-            jsonResponse += std::to_string(record.weights[j]);
+            jsonResponse += to_string(record.weights[j]);
             if (j < record.weights.size() - 1)
                 jsonResponse += ",";
         }
@@ -112,14 +112,14 @@ void HDE::TestServer::handleTrainingRequest(int clientSocket)
     jsonResponse += "]";
     jsonResponse += "}";
 
-    std::string response =
+    string response =
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: application/json\r\n"
         "Access-Control-Allow-Origin: http://localhost:3000\r\n"
         "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
         "Access-Control-Allow-Headers: Content-Type\r\n"
         "Content-Length: " +
-        std::to_string(jsonResponse.length()) + "\r\n"
+        to_string(jsonResponse.length()) + "\r\n"
                                                 "\r\n" +
         jsonResponse;
 
@@ -128,20 +128,6 @@ void HDE::TestServer::handleTrainingRequest(int clientSocket)
 
 void HDE::TestServer::handlePostRequest(const string &request)
 {
-    // srand(time(0));
-
-    // int epoch = rand() % 100; // Random epoch between 0-99
-    // double loss = static_cast<double>(rand()) / RAND_MAX; // Random loss between 0.0 and 1.0
-
-    // vector<double> weights;
-    // for (int i = 0; i < 10; i++) // Generate 10 random weights
-    // {
-    //     weights.push_back(static_cast<double>(rand()) / RAND_MAX);
-    // }
-
-    // TrainingDatabase db("../training_data.db");
-    // db.saveTrainingData(epoch, loss, weights);
-
     string response =
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: application/json\r\n"
@@ -175,7 +161,7 @@ void HDE::TestServer::closeConnection()
     close(newSocket);
 }
 
-void HDE::TestServer::start()
+void HDE::TestServer::startServer()
 {
     while (true)
     {

@@ -175,7 +175,7 @@ void FFNeuralNet::train(const vector<vector<uint8_t>> &images,
                         const vector<uint8_t> &labels,
                         int epochs, double learningRate)
 {
-    TrainingDatabase db("training_data.db", "probabilities.dat");
+    TrainingDatabase db("mnist/data/training_data.dat", "mnist/data/probabilities.dat");
 
     size_t numSamples = images.size();
     for (int epoch = 0; epoch < epochs; ++epoch)

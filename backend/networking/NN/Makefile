@@ -11,9 +11,9 @@ TRAIN_TARGET = train.out
 
 INFERENCE_SRCS = mnist/inference.cpp $(MNIST_SRCS)
 INFERENCE_OBJS = $(INFERENCE_SRCS:.cpp=.o)
-INFERENCE_TARGET = inference.out
+INFERENCE_TARGET = mnist/data/inference.out
 
-DATA_SRCS = weights.dat probabilities.dat training_data.db
+DATA_SRCS = mnist/data/weights.dat mnist/data/probabilities.dat mnist/data/training_data.dat
 
 all: $(TRAIN_TARGET) $(INFERENCE_TARGET)
 

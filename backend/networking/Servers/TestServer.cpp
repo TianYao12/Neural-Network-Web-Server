@@ -65,7 +65,7 @@ void HDE::TestServer::processRequestAndRespond()
 
 void HDE::TestServer::handleTrainingRequest(int clientSocket)
 {
-    TrainingDatabase db("./NN/training_data.db", "./NN/probabilities.dat");
+    TrainingDatabase db("./NN/mnist/data/training_data.dat", "./NN/mnist/data/probabilities.dat");
     auto [trainingRecords, probabilityData] = db.loadAllTrainingData();
 
     string jsonResponse = "{";

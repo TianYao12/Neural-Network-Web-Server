@@ -16,9 +16,9 @@ int main()
     std::cout << "Number of images loaded: " << test_images.size() << std::endl;
 
     FFNeuralNet net(MNIST_IMAGE_SIZE, 128, MNIST_POSSIBLE_DIGIT_OUTPUTS);
-    net.loadPretrainedWeights("weights.dat");
+    net.loadPretrainedWeights("mnist/data/weights.dat");
 
-    std::ofstream prob_file("probabilities.dat", std::ios::binary);
+    std::ofstream prob_file("mnist/data/probabilities.dat", std::ios::binary);
     if (!prob_file.is_open())
     {
         std::cerr << "Error opening probabilities.dat for writing!" << std::endl;

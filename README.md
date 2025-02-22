@@ -22,7 +22,7 @@
 ## Runnning
 * **Build & Run Training/Inference:**
     ```bash
-    (cd backend/networking/NN && make clean && make && ./train.out && ./inference.out)
+    (cd backend/networking/NN && make clean && make && ./train.out && ./mnist/data/inference.out)
     ```
 * **Build & Run Server:**
     ```bash

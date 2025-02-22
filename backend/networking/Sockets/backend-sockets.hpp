@@ -1,5 +1,5 @@
-#ifndef HDELIBC_SOCKETS_HPP
-#define HDELIBC_SOCKETS_HPP
+#ifndef BACKEND_SOCKETS_HPP
+#define BACKEND_SOCKETS_HPP
 
 #include <stdio.h>
 #include "SimpleSocket.hpp"

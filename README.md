@@ -22,11 +22,11 @@
 ## Runnning
 * **Build & Run Training/Inference:**
     ```bash
-    (cd hdelibc/networking/NN && make clean && make && ./train.out && ./inference.out)
+    (cd backend/networking/NN && make clean && make && ./train.out && ./inference.out)
     ```
 * **Build & Run Server:**
     ```bash
-    (cd hdelibc/networking && make clean && make && ./server.exe)
+    (cd backend/networking && make clean && make && ./server.exe)
     ```
 * **Run Frontend:**
     ```bash

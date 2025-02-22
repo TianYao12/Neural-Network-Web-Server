@@ -14,7 +14,7 @@ using namespace std;
  * @param input                 Input vector from the previous layer (or input layer)
  * @param weights               Weight matrix with dimensions: (current layer size x previous layer size)
  * @param biases                Bias vector for the current layer
- * @param activationFunction   Activation function to be applied to the layer's output
+ * @param activationFunction    Activation function to be applied to the weighted sum + bias for each row of the weight matrix
  *
  * @return Output vector for the current layer
  */
@@ -38,11 +38,11 @@ vector<double> FFNeuralNet::computeLayerActivation(
 }
 
 /**
- * @brief Backpropagation algorithm to update weights and biases.
+ * @brief Backpropagation algorithm to update weights and biases
  *
- * @param inputNormalized      Normalized input vector used in the forward pass.
- * @param hiddenLayerOutput   Output vector of the hidden layer from the forward pass.
- * @param outputLayerOutput   Output probability vector from the output layer (after softmax) from the forward pass.
+ * @param inputNormalized      Normalized input vector used in the forward pass
+ * @param hiddenLayerOutput    Output vector of the hidden layer from the forward pass
+ * @param outputLayerOutput    Output probability vector from the output layer (after softmax) from the forward pass
  * @param trueLabel            Correct class label for the input
  * @param learningRate         Control magnitude of weight and bias updates
  */
@@ -54,8 +54,11 @@ void FFNeuralNet::applyBackpropagation(
     double learningRate)
 {
     vector<double> output_error(outputLayerOutput.size());
+
     for (size_t j = 0; j < outputLayerOutput.size(); ++j)
     {
+        // derivative of the loss function (cross-entropy loss with softmax output)
+        // output error for class j = predicted probability for class j - true label (correct 1, incorrect 0)
         output_error[j] = outputLayerOutput[j] - (j == trueLabel ? 1.0 : 0.0);
     }
 

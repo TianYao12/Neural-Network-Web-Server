@@ -1,24 +1,23 @@
-# C++ Web Server and Neural Network
-
+# C++ Web Server and Neural Networks
 ## Purpose
-- The idea is to implement a web server in C++ from scratch that can take requests and respond with neural networok data (weights, biases, loss, prediction) after each epoch
-- A Next.js frontend will make requests to the server, and display the data, visualizing how the various parameters of a neural network change over time.
-
+- I wanted to get a more fundamental understanding of neural networks and web servers, which we use all the using abstracted frameworks.  
+- This web server take requests and respond with neural networok data (weights, biases, loss, prediction) after each epoch
+- A frontend will make requests to the server, and display the data, visualizing how the various parameters of a neural network change over time.
 
 ## Saving Training and Inference Data
 - After each epoch, the **weights** and **biases** are saved in binary
 - After inference, the output probabilities are also saved
 
 ## Running
-* **Build & Run Training/Inference:**
+* Build & Run Training/Inference:
     ```bash
     (cd backend/networking/NN && make clean && make && ./train.out && ./inference.out)
     ```
-* **Build & Run Server:**
+* Build & Run Server:
     ```bash
     (cd backend/networking && make clean && make && ./server.exe)
     ```
-* **Run Frontend:**
+* Run Frontend:
     ```bash
     (cd frontend && npm run dev)
     ```
@@ -38,11 +37,9 @@ A socket is a software endpoint that enables communication between two computers
     - listen() sets up a queue for incoming connections
 - ConnectingSocket: A client-side socket that connects to a server. This is not used right now as I'm just connecting to the server from my Next.js frontend
 
-
 ### Server Classes
 - SimpleServer: Owns the listening socket and handles client requests.
 - TestServer: A specific implementation of SimpleServer that processes requests.
-
 
 ### Web Server Flow
 - Create a socket 
@@ -50,6 +47,9 @@ A socket is a software endpoint that enables communication between two computers
 - Listen for incoming connections 
 - Accept client connections and respond
 
+## MNIST Image File Structure
+* Header (16 bytes): Magic number, image count, rows, columns (big-endian).
+* Pixel data of the actual images follows the header.
 
 ## Data Download
 1.  **Kaggle API Token:** Download from Kaggle.
@@ -57,7 +57,3 @@ A socket is a software endpoint that enables communication between two computers
     ```bash
     kaggle datasets download hojjatk/mnist-dataset
     ```
-
-## MNIST Image File Structure
-* Header (16 bytes): Magic number, image count, rows, columns (big-endian).
-* Pixel data of the actual images follows the header.

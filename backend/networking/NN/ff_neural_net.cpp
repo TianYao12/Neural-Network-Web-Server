@@ -43,14 +43,14 @@ vector<double> FFNeuralNet::computeLayerActivation(
  * @param inputNormalized      Normalized input vector used in the forward pass
  * @param hiddenLayerOutput    Output vector of the hidden layer from the forward pass
  * @param outputLayerOutput    Output probability vector from the output layer (after softmax) from the forward pass
- * @param trueLabel            Correct class label for the input
+ * @param actualLabel            Correct class label for the input
  * @param learningRate         Control magnitude of weight and bias updates
  */
 void FFNeuralNet::applyBackpropagation(
     const vector<double> &inputNormalized,
     const vector<double> &hiddenLayerOutput,
     const vector<double> &outputLayerOutput,
-    int trueLabel,
+    int actualLabel,
     double learningRate)
 {
     vector<double> output_error(outputLayerOutput.size());
@@ -59,7 +59,7 @@ void FFNeuralNet::applyBackpropagation(
     {
         // derivative of the loss function (cross-entropy loss with softmax output)
         // output error for class j = predicted probability for class j - true label (correct 1, incorrect 0)
-        output_error[j] = outputLayerOutput[j] - (j == trueLabel ? 1.0 : 0.0);
+        output_error[j] = outputLayerOutput[j] - (j == actualLabel ? 1.0 : 0.0);
     }
 
     // Gradients for hidden-to-output weights and output biases
@@ -75,14 +75,12 @@ void FFNeuralNet::applyBackpropagation(
     vector<double> hidden_error(hiddenLayerOutput.size(), 0.0);
     for (size_t j = 0; j < hiddenLayerOutput.size(); ++j)
     {
+        hidden_error[j] = 0.0; 
+
         for (size_t k = 0; k < outputLayerOutput.size(); ++k)
         {
             hidden_error[j] += output_error[k] * hiddenToOutputLayerWeights[k][j];
         }
-    }
-
-    for (size_t j = 0; j < hidden_error.size(); ++j)
-    {
         hidden_error[j] *= NNUtils::ActivationFunctions::reluDerivative(hiddenLayerOutput[j]);
     }
 
@@ -205,11 +203,11 @@ void FFNeuralNet::train(const vector<vector<uint8_t>> &images,
                 [](double x)
                 { return x; }));
 
-            int trueLabel = labels[i];
-            double loss = -log(outputLayerOutput[trueLabel]);
+            int actualLabel = labels[i];
+            double loss = -log(outputLayerOutput[actualLabel]);
             totalLoss += loss;
 
-            applyBackpropagation(inputNormalized, hiddenLayerOutput, outputLayerOutput, trueLabel, learningRate);
+            applyBackpropagation(inputNormalized, hiddenLayerOutput, outputLayerOutput, actualLabel, learningRate);
         }
 
         double averageLoss = totalLoss / numSamples;

@@ -22,9 +22,9 @@ class FFNeuralNet
         const std::vector<double> &inputNormalized,
         const std::vector<double> &hiddenLayerOutput,
         const std::vector<double> &outputLayerOutput,
-        int trueLabel,
+        int actualLabel,
         double learningRate);
-        
+
     std::vector<double> extractNetworkParameters() const;
 
 public:

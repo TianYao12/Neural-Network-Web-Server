@@ -44,6 +44,7 @@ $$
 $$
 
 Using the chain rule:
+
 $$
 \delta_j^{(L)} = \frac{\partial L}{\partial z_j^{(L)}} = \frac{\partial L}{\partial a_j^{(L)}} \frac{\partial a_j^{(L)}}{\partial z_j^{(L)}} = (a_j^{(L)} - y_j) f'^{(L)}(z_j^{(L)})
 $$

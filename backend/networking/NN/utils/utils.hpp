@@ -10,6 +10,7 @@ namespace NNUtils
 {
     void initializeWeights(std::vector<std::vector<double>> &weights, double min_val, double max_val);
     void initializeBiases(std::vector<double> &biases, double initial_value = 0.0);
+    static double randomDouble(double min_val, double max_val);
 
     namespace ActivationFunctions
     {

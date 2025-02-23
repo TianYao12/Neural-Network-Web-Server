@@ -20,8 +20,8 @@ class FFNeuralNet
 
     void applyBackpropagation(
         const std::vector<double> &inputNormalized,
-        const std::vector<double> &hiddenLayerOutput,
-        const std::vector<double> &outputLayerOutput,
+        const std::vector<double> &hiddenToOutputLayerActivation,
+        const std::vector<double> &outputLayerProbability,
         int actualLabel,
         double learningRate);
 

@@ -21,7 +21,7 @@ $$
 \delta_j^{(l)} = \frac{\partial L}{\partial z_j^{(l)}}
 $$
 
-## Compute the Output Loss
+## Output Loss
 Softmax activation is used for output along with cross-entropy loss:
 
 $$
@@ -56,15 +56,15 @@ $$
 
 Code segment:
 ```c++
-for (size_t j = 0; j < outputLayerOutput.size(); ++j)
+for (size_t j = 0; j < outputLayerProbability.size(); ++j)
 {
     // (predicted probability for class j) - (one-hot-encoded actual label (correct 1, incorrect 0))
-    output_error[j] = outputLayerOutput[j] - (j == actualLabel ? 1.0 : 0.0);
+    output_error[j] = outputLayerProbability[j] - (j == actualLabel ? 1.0 : 0.0);
 }
 
 ```
 
-## Compute Gradients for Hidden to Output Weights
+## Gradient Descent for Lth layer (Hidden-to-Output)
 Recall that the pre-activation is defined as:
 
 $$
@@ -97,9 +97,9 @@ Code segment:
 ```c++
 for (size_t j = 0; j < hiddenToOutputLayerWeights.size(); ++j)
 {
-    for (size_t k = 0; k < hiddenLayerOutput.size(); ++k)
+    for (size_t k = 0; k < hiddenToOutputLayerActivation.size(); ++k)
     {
-        hiddenToOutputLayerWeights[j][k] -= learningRate * output_error[j] * hiddenLayerOutput[k];
+        hiddenToOutputLayerWeights[j][k] -= learningRate * output_error[j] * hiddenToOutputLayerActivation[k];
     }
     outputLayerBiases[j] -= learningRate * output_error[j];
 }
@@ -132,24 +132,6 @@ $$
 \delta_j^{(L-1)} = f'^{(L-1)}(z_j^{(L-1)}) \sum_k W_{kj}^{(L)} \delta_k^{(L)}
 $$
 
-### **Explanation of Terms**
-- **δ<sub>j</sub>(L-1)** is the error term for neuron *j* in the hidden layer.
-- **f' <sup>(L-1)</sup>(z<sub>j</sub>(L-1))** is the derivative of the activation function applied to neuron *j* in layer *L-1*.
-- **W<sub>kj</sub>(L)** is the weight from hidden neuron *j* to output neuron *k*.
-- **δ<sub>k</sub>(L)** is the error term from the output layer.
-
-Code segment:
-```c++
-for (size_t j = 0; j < hiddenLayerOutput.size(); ++j)
-{
-    for (size_t k = 0; k < outputLayerOutput.size(); ++k)
-    {
-        hidden_error[j] += output_error[k] * hiddenToOutputLayerWeights[k][j];
-    }
-}
-```
-
-## ReLU Derivative
 Since the hidden layer uses ReLU, we need to adjust for its derivative:
 
 $$
@@ -165,14 +147,22 @@ f'(z) = \begin{cases}
 \end{cases}
 $$
 
+Code segment:
 ```c++
-for (size_t j = 0; j < hidden_error.size(); ++j)
+vector<double> hidden_error(hiddenToOutputLayerActivation.size(), 0.0);
+for (size_t j = 0; j < hiddenToOutputLayerActivation.size(); ++j)
 {
-    hidden_error[j] *= NNUtils::ActivationFunctions::reluDerivative(hiddenLayerOutput[j]);
+    hidden_error[j] = 0.0;
+
+    for (size_t k = 0; k < outputLayerProbability.size(); ++k)
+    {
+        hidden_error[j] += output_error[k] * hiddenToOutputLayerWeights[k][j];
+    }
+    hidden_error[j] *= NNUtils::ActivationFunctions::reluDerivative(hiddenToOutputLayerActivation[j]);
 }
 ```
 
-## Compute Gradients for Input-to-Hidden Weights
+## Gradient Descent for (L-1)th layer (Input-to-Hidden)
 Using the same gradient descent rule:
 
 $$
@@ -197,6 +187,7 @@ for (size_t j = 0; j < inputToHiddenLayerWeights.size(); ++j)
 {
     for (size_t k = 0; k < inputNormalized.size(); ++k)
     {
+        // since we have 1 hidden layer, the activation in (L-2) layer is the input normalized
         inputToHiddenLayerWeights[j][k] -= learningRate * hidden_error[j] * inputNormalized[k];
     }
     hiddenLayerBiases[j] -= learningRate * hidden_error[j];

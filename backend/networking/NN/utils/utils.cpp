@@ -25,6 +25,13 @@ void NNUtils::initializeBiases(vector<double> &biases, double initial_value)
     fill(biases.begin(), biases.end(), initial_value);
 }
 
+static double NNUtils::randomDouble(double min_val, double max_val) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> dist(min_val, max_val);
+    return dist(gen);
+}
+
 double NNUtils::ActivationFunctions::relu(double x)
 {
     return max(0.0, x);

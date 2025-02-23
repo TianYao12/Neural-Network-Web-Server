@@ -41,54 +41,54 @@ vector<double> FFNeuralNet::computeLayerActivation(
  * @brief Backpropagation algorithm to update weights and biases
  *
  * @param inputNormalized      Normalized input vector used in the forward pass
- * @param hiddenLayerOutput    Output vector of the hidden layer from the forward pass
- * @param outputLayerOutput    Output probability vector from the output layer (after softmax) from the forward pass
+ * @param hiddenToOutputLayerActivation    Output vector of the hidden layer from the forward pass
+ * @param outputLayerProbability    Output probability vector from the output layer (after softmax) from the forward pass
  * @param actualLabel            Correct class label for the input
  * @param learningRate         Control magnitude of weight and bias updates
  */
 void FFNeuralNet::applyBackpropagation(
     const vector<double> &inputNormalized,
-    const vector<double> &hiddenLayerOutput,
-    const vector<double> &outputLayerOutput,
+    const vector<double> &hiddenToOutputLayerActivation,
+    const vector<double> &outputLayerProbability,
     int actualLabel,
     double learningRate)
 {
-    vector<double> output_error(outputLayerOutput.size());
+    vector<double> output_error(outputLayerProbability.size());
 
-    for (size_t j = 0; j < outputLayerOutput.size(); ++j)
+    for (size_t j = 0; j < outputLayerProbability.size(); ++j)
     {
-        // derivative of the loss function (cross-entropy loss with softmax output)
-        // output error for class j = predicted probability for class j - true label (correct 1, incorrect 0)
-        output_error[j] = outputLayerOutput[j] - (j == actualLabel ? 1.0 : 0.0);
+        // dL/dz
+        output_error[j] = outputLayerProbability[j] - (j == actualLabel ? 1.0 : 0.0);
     }
 
-    // Gradients for hidden-to-output weights and output biases
+    // Gradients descent to update weights and biases in Lth layer (hidden-to-output) weights and biases
     for (size_t j = 0; j < hiddenToOutputLayerWeights.size(); ++j)
     {
-        for (size_t k = 0; k < hiddenLayerOutput.size(); ++k)
+        for (size_t k = 0; k < hiddenToOutputLayerActivation.size(); ++k)
         {
-            hiddenToOutputLayerWeights[j][k] -= learningRate * output_error[j] * hiddenLayerOutput[k];
+            hiddenToOutputLayerWeights[j][k] -= learningRate * output_error[j] * hiddenToOutputLayerActivation[k];
         }
         outputLayerBiases[j] -= learningRate * output_error[j];
     }
 
-    vector<double> hidden_error(hiddenLayerOutput.size(), 0.0);
-    for (size_t j = 0; j < hiddenLayerOutput.size(); ++j)
+    vector<double> hidden_error(hiddenToOutputLayerActivation.size(), 0.0);
+    for (size_t j = 0; j < hiddenToOutputLayerActivation.size(); ++j)
     {
-        hidden_error[j] = 0.0; 
+        hidden_error[j] = 0.0;
 
-        for (size_t k = 0; k < outputLayerOutput.size(); ++k)
+        for (size_t k = 0; k < outputLayerProbability.size(); ++k)
         {
             hidden_error[j] += output_error[k] * hiddenToOutputLayerWeights[k][j];
         }
-        hidden_error[j] *= NNUtils::ActivationFunctions::reluDerivative(hiddenLayerOutput[j]);
+        hidden_error[j] *= NNUtils::ActivationFunctions::reluDerivative(hiddenToOutputLayerActivation[j]);
     }
 
-    // Gradients for input-to-hidden weights and hidden biases
+    // Gradients descent to update weights and biases in (L-1)th layer (input-to-hidden)
     for (size_t j = 0; j < inputToHiddenLayerWeights.size(); ++j)
     {
         for (size_t k = 0; k < inputNormalized.size(); ++k)
         {
+            // since we have 1 hidden layer, the activation in (L-2) layer is the input normalized
             inputToHiddenLayerWeights[j][k] -= learningRate * hidden_error[j] * inputNormalized[k];
         }
         hiddenLayerBiases[j] -= learningRate * hidden_error[j];
@@ -128,13 +128,13 @@ vector<double> FFNeuralNet::performForwardPass(const vector<uint8_t> &input_byte
         inputNormalized[i] = static_cast<double>(input_bytes[i]) / 255.0;
     }
 
-    vector<double> hiddenLayerOutput = computeLayerActivation(
+    vector<double> hiddenToOutputLayerActivation = computeLayerActivation(
         inputNormalized,
         inputToHiddenLayerWeights,
         hiddenLayerBiases, NNUtils::ActivationFunctions::relu);
 
     vector<double> output_layer_logits = computeLayerActivation(
-        hiddenLayerOutput,
+        hiddenToOutputLayerActivation,
         hiddenToOutputLayerWeights,
         outputLayerBiases,
         [](double x)
@@ -191,23 +191,23 @@ void FFNeuralNet::train(const vector<vector<uint8_t>> &images,
                 inputNormalized[j] = static_cast<double>(images[i][j]) / 255.0;
             }
 
-            vector<double> hiddenLayerOutput = computeLayerActivation(
+            vector<double> hiddenToOutputLayerActivation = computeLayerActivation(
                 inputNormalized,
                 inputToHiddenLayerWeights,
                 hiddenLayerBiases, NNUtils::ActivationFunctions::relu);
 
-            vector<double> outputLayerOutput = NNUtils::ActivationFunctions::softmax(computeLayerActivation(
-                hiddenLayerOutput,
+            vector<double> outputLayerProbability = NNUtils::ActivationFunctions::softmax(computeLayerActivation(
+                hiddenToOutputLayerActivation,
                 hiddenToOutputLayerWeights,
                 outputLayerBiases,
                 [](double x)
                 { return x; }));
 
             int actualLabel = labels[i];
-            double loss = -log(outputLayerOutput[actualLabel]);
+            double loss = -log(outputLayerProbability[actualLabel]);
             totalLoss += loss;
 
-            applyBackpropagation(inputNormalized, hiddenLayerOutput, outputLayerOutput, actualLabel, learningRate);
+            applyBackpropagation(inputNormalized, hiddenToOutputLayerActivation, outputLayerProbability, actualLabel, learningRate);
         }
 
         double averageLoss = totalLoss / numSamples;

@@ -1,7 +1,7 @@
 # C++ Web Server and Neural Networks
 ## Purpose
-- I wanted to get a more fundamental understanding of neural networks and web servers, which we use all the using abstracted frameworks.  
-- This web server take requests and respond with neural networok data (weights, biases, loss, prediction) after each epoch
+- I wanted to get a more fundamental understanding of neural networks and web servers, which we use all the time using abstracted frameworks like Node.js or PyTorch
+- This web server take requests and respond with neural network data (weights, biases, loss, prediction) after each epoch
 - A frontend will make requests to the server, and display the data, visualizing how the various parameters of a neural network change over time.
 
 ## Saving Training and Inference Data

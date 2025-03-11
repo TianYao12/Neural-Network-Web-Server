@@ -42,19 +42,22 @@ double NNUtils::ActivationFunctions::reluDerivative(double x)
     return (x > 0.0) ? 1.0 : 0.0;
 }
 
-vector<double> NNUtils::ActivationFunctions::softmax(const vector<double> &logits)
+std::vector<double> NNUtils::ActivationFunctions::softmax(const std::vector<double> &logits)
 {
-    double max_val = *max_element(logits.begin(), logits.end());
-    vector<double> exp_values(logits.size());
+    double max_val = *std::max_element(logits.begin(), logits.end()); 
+    std::vector<double> exp_values(logits.size());
     double sum_exp = 0.0;
+
     for (size_t i = 0; i < logits.size(); ++i)
     {
-        exp_values[i] = exp(logits[i] - max_val);
+        exp_values[i] = std::exp(logits[i] - max_val); 
         sum_exp += exp_values[i];
     }
+
     for (size_t i = 0; i < logits.size(); ++i)
     {
         exp_values[i] /= sum_exp;
     }
+
     return exp_values;
 }

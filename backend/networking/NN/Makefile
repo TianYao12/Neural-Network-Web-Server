@@ -2,18 +2,25 @@ CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++20 -I./utils -I../Database  
 LDFLAGS =
 
-MNIST_SRCS = mnist/mnist_loader.cpp ff_neural_net.cpp utils/utils.cpp ../Database/Database.cpp 
-MNIST_OBJS = $(MNIST_SRCS:.cpp=.o)
+CNN_SRCS = convolutional_neural_net.cpp
 
-TRAIN_SRCS = mnist/train.cpp $(MNIST_SRCS)
+MNIST_SRCS = mnist/mnist_loader.cpp utils/utils.cpp ../Database/Database.cpp
+# MNIST_SRCS = mnist/mnist_loader.cpp ff_neural_net.cpp utils/utils.cpp ../Database/Database.cpp 
+# MNIST_OBJS = $(MNIST_SRCS:.cpp=.o)
+MNIST_OBJS = $(MNIST_SRCS:.cpp=.o) $(CNN_SRCS:.cpp=.o)
+
+TRAIN_SRCS = mnist/train.cpp $(MNIST_SRCS) convolutional_neural_net.cpp 
 TRAIN_OBJS = $(TRAIN_SRCS:.cpp=.o)
 TRAIN_TARGET = train.out
 
-INFERENCE_SRCS = mnist/inference.cpp $(MNIST_SRCS)
+# INFERENCE_SRCS = mnist/inference.cpp $(MNIST_SRCS)
+INFERENCE_SRCS = mnist/inference.cpp $(MNIST_SRCS) convolutional_neural_net.cpp
 INFERENCE_OBJS = $(INFERENCE_SRCS:.cpp=.o)
 INFERENCE_TARGET = inference.out
 
 DATA_SRCS = mnist/data/weights.dat mnist/data/probabilities.dat mnist/data/training_data.dat
+
+CNN_SRCS = convolutional_neural_net.cpp
 
 all: $(TRAIN_TARGET) $(INFERENCE_TARGET)
 

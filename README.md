@@ -4,6 +4,10 @@
 - This web server take requests and respond with neural network data (weights, biases, loss, prediction) after each epoch
 - A frontend will make requests to the server, and display the data, visualizing how the various parameters of a neural network change over time.
 
+## Versions
+- On the main branch is the implementation of the standard feed forward neural network
+- I tried with a convolutional neural network, and that needs some work. It is on the cnn branch
+
 ## Saving Training and Inference Data
 - After each epoch, the **weights** and **biases** are saved in binary
 - After inference, the output probabilities are also saved
